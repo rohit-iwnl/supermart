@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -5,9 +6,38 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../model/cart_model.dart';
 
-class CartPage extends StatelessWidget {
-  const CartPage({super.key});
+class CartPayment extends StatefulWidget {
+  const CartPayment({super.key});
+
   @override
+  State<CartPayment> createState() => _CartPaymentState();
+}
+
+class _CartPaymentState extends State<CartPayment> {
+  final _razorpay = Razorpay();
+
+  @override
+  void initState() {
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    super.initState();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Do something when payment succeeds
+    print("Payment successful");
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    // Do something when payment fails
+    print("Payment failed");
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    // Do something when an external wallet is selected
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -58,7 +88,7 @@ class CartPage extends StatelessWidget {
                               style: const TextStyle(fontSize: 18),
                             ),
                             subtitle: Text(
-                              '\$' + value.cartItems[index][1],
+                              '\₹' + value.cartItems[index][1],
                               style: const TextStyle(fontSize: 12),
                             ),
                             trailing: IconButton(
@@ -99,7 +129,22 @@ class CartPage extends StatelessWidget {
                           const SizedBox(height: 8),
                           // total price
                           Text(
-                            '\$${value.calculateTotal()}',
+                            '\₹${value.calculateTotal()}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Total Weight(grams)',
+                            style: TextStyle(color: Colors.green[200]),
+                          ),
+
+                          const SizedBox(height: 8),
+                          // total price
+                          Text(
+                            '${value.calculateTotalWeight()}',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -113,21 +158,35 @@ class CartPage extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.green.shade200),
-                          borderRadius: BorderRadius.circular(28),
+                          borderRadius: BorderRadius.circular(25),
                         ),
                         padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: const [
-                            Text(
-                              'Pay Now',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ],
+                        child: CupertinoButton(
+                          onPressed: () {
+                            var options = {
+                              'key': "rzp_test_oxBGzv5idgEZ8Y",
+                              'amount': (value.calculateTotal() * 100)
+                                  .toString(), //in the smallest currency sub-unit.
+                              'name': 'SuperMart',
+                              'description': 'Demo payment',
+                              'timeout': 300, // in seconds
+                              'prefill': {'contact': '', 'email': ''}
+                            };
+                            _razorpay.open(options);
+                          },
+                          child: Row(
+                            children: const [
+                              Text(
+                                'Pay Now',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -139,5 +198,11 @@ class CartPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
   }
 }

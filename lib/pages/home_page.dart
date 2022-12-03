@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:groceryapp/model/DatabaseManager.dart';
+import 'package:groceryapp/pages/cart_page_payment.dart';
 import 'package:provider/provider.dart';
 import '../components/grocery_item_tile.dart';
 import '../model/cart_model.dart';
 import 'cart_page.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_mobile_vision_2/flutter_mobile_vision_2.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +18,49 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var scanResult = "Qr code result";
+  List productsListMain = [];
+  bool _isInitialised = false;
+
+  void _scanVision() async {
+    List<Barcode> barcodes = [];
+    try {
+      barcodes = await FlutterMobileVision.scan(
+        waitTap: true,
+        showText: true,
+        fps: 15,
+      );
+      if (barcodes.length > 0) {
+        for(Barcode barcode in barcodes){
+          print("barcodeValues ${barcode.displayValue} ${barcode.getFormatString()} ${barcode.getValueFormatString()}");
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    FlutterMobileVision.start().then((x) => setState(() {
+          _isInitialised = true;
+        }));
+    fetchDatabaseList();
+  }
+
+  fetchDatabaseList() async {
+    dynamic resultant = await DatabaseManager().getProductsList();
+    if (resultant == null) {
+      print("Unable to fetch data");
+    } else {
+      setState(() {
+        productsListMain = resultant;
+      });
+    }
+    print(productsListMain);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +75,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         title: Text(
-          'Sydney, Australia',
+          'Bangalore',
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[700],
@@ -40,12 +88,13 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                Icons.person,
-                color: Colors.grey,
+              child: InkWell(
+                splashColor: Colors.green,
+                onTap:_scanVision,
+                child: const Icon(Icons.camera_alt_outlined),
               ),
             ),
           ),
@@ -57,7 +106,7 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return CartPage();
+              return CartPayment();
             },
           ),
         ),
@@ -66,12 +115,11 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 48),
+          const SizedBox(height: 20),
 
-          // good morning bro
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Text('Good morning,'),
+            child: Text('Good afternoon,'),
           ),
 
           const SizedBox(height: 4),
@@ -80,7 +128,7 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
-              "Let's order fresh items for you",
+              "Let's order items for you",
               style: GoogleFonts.notoSerif(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -101,7 +149,7 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
-              "Fresh Items",
+              "Popular Items",
               style: GoogleFonts.notoSerif(
                 //fontWeight: FontWeight.bold,
                 fontSize: 18,
@@ -109,7 +157,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // recent orders -> show last 3
+          // recent orders -> show last 3h
           Expanded(
             child: Consumer<CartModel>(
               builder: (context, value, child) {
@@ -139,5 +187,21 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void scanBarcode() async {
+    print("opening");
+    String scan;
+    try {
+      scan = await FlutterBarcodeScanner.scanBarcode(
+          '#ff66666', 'Cancel', true, ScanMode.BARCODE);
+    } on PlatformException {
+      scan = "Failed to scan barcode";
+    }
+    if (!mounted) return;
+    setState(() {
+      scanResult = scan;
+    });
+    print(scan);
   }
 }

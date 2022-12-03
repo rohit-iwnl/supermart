@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.groceryapp">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature android:name="android.hardware.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
    <application
         android:label="groceryapp"
         android:name="${applicationName}"
@@ -25,6 +30,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name="ng.com.piccmaq.flutter.flutter_mobile_vision_2.barcode.BarcodeCaptureActivity" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

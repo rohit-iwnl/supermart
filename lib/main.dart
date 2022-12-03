@@ -1,9 +1,14 @@
+
 import 'package:flutter/material.dart';
 import 'package:groceryapp/model/cart_model.dart';
 import 'package:provider/provider.dart';
 import 'pages/intro_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

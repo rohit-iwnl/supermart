@@ -27,7 +27,7 @@ class IntroScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(28.0),
               child: Text(
-                'We deliver groceries at your doorstep',
+                'Checkout faster in a supermarket',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.notoSerif(
                     fontSize: 36, fontWeight: FontWeight.bold),
@@ -36,7 +36,7 @@ class IntroScreen extends StatelessWidget {
 
             // groceree gives you fresh vegetables and fruits
             Text(
-              'Fresh items everyday',
+              'Quicker and efficient',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,

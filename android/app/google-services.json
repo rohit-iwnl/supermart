@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "265089930946",
+    "project_id": "unqueue-dev",
+    "storage_bucket": "unqueue-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265089930946:android:51b75715818b30dd6a0d5b",
+        "android_client_info": {
+          "package_name": "com.example.groceryapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "265089930946-f1492g5v1k8dq865ken1gg0m8eu3gdsg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjN1X5yiLtcxJfq929IUA-5YfuKPhtS0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "265089930946-f1492g5v1k8dq865ken1gg0m8eu3gdsg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
