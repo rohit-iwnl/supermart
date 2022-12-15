@@ -5,6 +5,7 @@ import 'package:groceryapp/model/DatabaseManager.dart';
 import 'package:groceryapp/pages/cart_page_payment.dart';
 import 'package:provider/provider.dart';
 import '../components/grocery_item_tile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/cart_model.dart';
 import 'cart_page.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -19,8 +20,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var scanResult = "Qr code result";
+  var add = "";
   List productsListMain = [];
+  List productsListid = [];
+  List productsListname = [];
+  List productsListprice = [];
+  List productsListweight = [];
+  List cartBarcodes = [];
+  List adding = [];
   bool _isInitialised = false;
+  List extra = [];
+  var count = 0;
+
+  void addDetails(String id, int price, int weight, String name) {
+    productsListid.add(id);
+    productsListname.add(price);
+    productsListprice.add(weight);
+    productsListweight.add(name);
+  }
 
   void _scanVision() async {
     List<Barcode> barcodes = [];
@@ -28,11 +45,26 @@ class _HomePageState extends State<HomePage> {
       barcodes = await FlutterMobileVision.scan(
         waitTap: true,
         showText: true,
-        fps: 15,
+        fps: 20,
       );
       if (barcodes.length > 0) {
-        for(Barcode barcode in barcodes){
-          print("barcodeValues ${barcode.displayValue} ${barcode.getFormatString()} ${barcode.getValueFormatString()}");
+        for (Barcode barcode in barcodes) {
+          print(
+              "barcodeValues ${barcode.displayValue} ${barcode.getFormatString()} ${barcode.getValueFormatString()}");
+          cartBarcodes.add((barcode.displayValue).toString());
+        }
+        for (var i = 1; i < productsListid.length; i++) {
+          var current = productsListid[i];
+          if (cartBarcodes[count] == current) {
+            adding.add(productsListname[i]);
+            adding.add(productsListprice[i]);
+            adding.add("lib/images/biscuit.png");
+            adding.add("MaterialColor(primary value: Color(0xff4caf50))");
+            adding.add(productsListweight[i]);
+            add =
+                "[ ${productsListname[i].toString()}, ${productsListprice[i]}, lib/images/biscuit.png, MaterialColor(primary value: Color(0xff4caf50)), ${productsListweight[i]}]";
+            print(adding);
+          }
         }
       }
     } catch (e) {
@@ -46,7 +78,10 @@ class _HomePageState extends State<HomePage> {
     FlutterMobileVision.start().then((x) => setState(() {
           _isInitialised = true;
         }));
-    fetchDatabaseList();
+    fetchDatabaseid();
+    fetchDatabasename();
+    fetchDatabaseprice();
+    fetchDatabaseweight();
   }
 
   fetchDatabaseList() async {
@@ -58,7 +93,55 @@ class _HomePageState extends State<HomePage> {
         productsListMain = resultant;
       });
     }
-    print(productsListMain);
+    print(productsListid);
+  }
+
+  fetchDatabaseid() async {
+    dynamic resultant = await DatabaseManager().getProductsid();
+    if (resultant == null) {
+      print("Unable to fetch data");
+    } else {
+      setState(() {
+        productsListid = resultant;
+      });
+    }
+    print(productsListid);
+  }
+
+  fetchDatabasename() async {
+    dynamic resultant = await DatabaseManager().getProductsname();
+    if (resultant == null) {
+      print("Unable to fetch data");
+    } else {
+      setState(() {
+        productsListname = resultant;
+      });
+    }
+    print(productsListname);
+  }
+
+  fetchDatabaseprice() async {
+    dynamic resultant = await DatabaseManager().getProductsprice();
+    if (resultant == null) {
+      print("Unable to fetch data");
+    } else {
+      setState(() {
+        productsListprice = resultant;
+      });
+    }
+    print(productsListprice);
+  }
+
+  fetchDatabaseweight() async {
+    dynamic resultant = await DatabaseManager().getProductsweight();
+    if (resultant == null) {
+      print("Unable to fetch data");
+    } else {
+      setState(() {
+        productsListweight = resultant;
+      });
+    }
+    print(productsListweight);
   }
 
   @override
@@ -93,7 +176,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: InkWell(
                 splashColor: Colors.green,
-                onTap:_scanVision,
+                onTap: _scanVision,
                 child: const Icon(Icons.camera_alt_outlined),
               ),
             ),
@@ -115,6 +198,24 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(right: 40),
+                child: InkWell(
+                  splashColor: Colors.green,
+                  onTap: () {
+                    count = count + 1;
+                    Provider.of<CartModel>(context, listen: false)
+                        .addItemToCartBarcodes(adding);
+                  },
+                  child: const Icon(Icons.task_alt_outlined),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
 
           const Padding(
@@ -124,7 +225,7 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 4),
 
-          // Let's order fresh items for you
+          
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
@@ -145,7 +246,6 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 24),
 
-          // categories -> horizontal listview
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(

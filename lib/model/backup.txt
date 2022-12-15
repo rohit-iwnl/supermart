@@ -1,0 +1,15 @@
+    try {
+      await productsList.get().then((querySnapshot) {
+        querySnapshot.docs.forEach((element) {
+          itemsList.add(element.data);
+          print(element.data());
+        });
+      });
+
+
+                InkWell(
+            splashColor: Colors.green,
+            onTap: () {
+              Provider.of<CartModel>(context, listen: false)
+                  .addItemToCartBarcodes(add);
+            },
